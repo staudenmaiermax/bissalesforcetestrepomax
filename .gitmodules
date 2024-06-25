@@ -1,0 +1,3 @@
+[submodule "Subrepo123"]
+	path = Subrepo123
+	url = https://github.com/staudenmaiermax/subrepo123
