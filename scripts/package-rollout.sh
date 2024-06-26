@@ -60,7 +60,7 @@ export PARAM_SUBSCRIBER_VERSION_EXPORT="$subscriberVersionId"
 # Check if PARAM_DEVHUB_ORG is set correctly
 if [ -z "$PARAM_DEVHUB_ORG" ]; then
     echo "There is no DevHub Org parameter"
-    exit 104
+    exit 201
 fi
 
 # Check if PARAM_SUBSCRIBER_VERSION_EXPORT is set correctly
