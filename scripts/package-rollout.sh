@@ -4,8 +4,8 @@
 set -euo pipefail
 
 # Check if there is a changed submodule
-echo test
-changedSubmodule=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '^packages/' | head -n 1)
+echo skriptstartet
+changedSubmodule=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '^packages/' | head -n 1 | cut -d'/' -f1-2)
 echo $changedSubmodule 
 
 # Exit script without errors if no submodule changed
