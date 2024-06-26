@@ -1,0 +1,24 @@
+description: >
+  Sample use of the auth command to authenticate a production (DevHub) environment.
+
+usage:
+  version: 2.1
+  orbs:
+    jsc-sfdx: jsc/salesforce@0.4.0
+  jobs:
+    auth_example_job:
+      docker:
+        - image: cimg/openjdk:17.0-node
+      steps:
+        - checkout
+        - jsc-sfdx/install
+        - jsc-sfdx/auth:
+            username: << pipeline.parameters.dehubUsername >>
+            instanceUrl: https://jl-consulting-dev-ed.my.salesforce.com
+            jwtKey: TEST_JWT_KEY
+            consumerKey: TEST_CONSUMER_KEY
+            setDefault: true
+  workflows:
+    sample_workflow:
+      jobs:
+        - auth_example_job

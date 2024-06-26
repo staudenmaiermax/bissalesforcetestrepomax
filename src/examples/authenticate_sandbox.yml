@@ -1,0 +1,23 @@
+description: >
+  A sample use of the auth command to authenticate a sandbox environment.
+
+usage:
+  version: 2.1
+  orbs:
+    jsc-sfdx: jsc/salesforce@0.4.0
+  jobs:
+    auth_example_job:
+      docker:
+        - image: cimg/openjdk:17.0-node
+      steps:
+        - checkout
+        - jsc-sfdx/install
+        - jsc-sfdx/auth:
+            username: << pipeline.parameters.uatSandboxUsername >>
+            instanceUrl: https://test.salesforce.com
+            jwtKey: TEST_JWT_KEY
+            consumerKey: UAT_SANDBOX_CONSUMER_KEY
+  workflows:
+    sample_workflow:
+      jobs:
+        - auth_example_job

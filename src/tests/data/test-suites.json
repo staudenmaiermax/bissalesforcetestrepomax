@@ -1,0 +1,31 @@
+{
+  "status": 0,
+  "result": {
+    "records": [
+      {
+        "attributes": {
+          "type": "ApexTestSuite",
+          "url": "/services/data/v56.0/sobjects/ApexTestSuite/05F9Y000000000VUAQ"
+        },
+        "TestSuiteName": "TestSuite1"
+      },
+      {
+        "attributes": {
+          "type": "ApexTestSuite",
+          "url": "/services/data/v56.0/sobjects/ApexTestSuite/05F67000000GmfxEAC"
+        },
+        "TestSuiteName": "TestSuite2"
+      },
+      {
+        "attributes": {
+          "type": "ApexTestSuite",
+          "url": "/services/data/v56.0/sobjects/ApexTestSuite/05F67000000GmfyEAC"
+        },
+        "TestSuiteName": "TestSuite3"
+      }
+    ],
+    "totalSize": 3,
+    "done": true
+  },
+  "warnings": []
+}

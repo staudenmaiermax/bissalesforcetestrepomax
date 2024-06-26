@@ -1,0 +1,8 @@
+version: 2.1
+
+description: >
+  An orb around building, installing and testing second-generation packages in Salesforce, using Salesforce CLI (sf).
+
+display:
+  home_url: "https://github.com/j-schreiber/salesforce-circleci-orb"
+  source_url: "https://github.com/j-schreiber/salesforce-circleci-orb"

@@ -1,0 +1,27 @@
+description: >
+  Downloads and installs the latest SF CLI version (with SFDX Alias) from the official Salesforce channels.
+
+parameters:
+  salesforceCliVersion:
+    description: Environment variable that holds the package version that should be installed.
+      If empty or the variable does not exist, installs the latest version.
+    default: SALESFORCE_CLI_VERSION
+    type: env_var_name
+
+steps:
+  - run:
+      environment:
+        PARAM_REQUESTED_CLI_VERSION: << parameters.salesforceCliVersion >>
+      name: Install SF CLI (with SFDX Alias)
+      command: <<include(scripts/install-cli.sh)>>
+  - run:
+      name: Verify CLI Installation
+      command: |
+        sfdx version
+        sf version
+  - run:
+      name: Install Packaging Plugin
+      command: sf plugins install @salesforce/plugin-packaging
+  - run:
+      name: Install TMH Plugin
+      command: <<include(scripts/install-tmh-cli-plugin.sh)>>

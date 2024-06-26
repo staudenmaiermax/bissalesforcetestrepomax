@@ -1,0 +1,32 @@
+description: >
+  A sample execution of the run-test-suites command. Runs specific test suites on the target org,
+  test results are stored in a custom output directory. This command assumes the CLI is installed
+  and authenticated. See `authenticate_production` example for more details. Test suites are grouped
+  by comma `,` and split by space ` `.
+
+usage:
+  version: 2.1
+  orbs:
+    jsc-sfdx: jsc/salesforce@0.4.0
+
+  parameters:
+    username-prod:
+      description: Production username for the devhub org
+      type: string
+      default: info@lietzau-consulting.de
+
+  jobs:
+    run_specific_test_suites:
+      docker:
+        - image: cimg/openjdk:17.0-node
+      steps:
+        - jsc-sfdx/run-test-suites:
+            testSuites: TestSuite1,TestSuite2 TestSuite3 TestSuite4,TestSuite5
+            targetOrg: << pipeline.parameters.username-prod >>
+            outputDir: test-results/my-results
+        - store_test_results:
+            path: test-results/my-results
+  workflows:
+    sample_workflow:
+      jobs:
+        - run_specific_test_suites

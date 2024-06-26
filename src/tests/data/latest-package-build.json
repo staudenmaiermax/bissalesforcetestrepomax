@@ -1,0 +1,17 @@
+{
+  "status": 0,
+  "result": {
+    "records": [
+      {
+        "attributes": {
+          "type": "Package2Version",
+          "url": "/services/data/v56.0/tooling/sobjects/Package2Version/05i9Y0000000000AAA"
+        },
+        "SubscriberPackageVersionId": "04t9Y0000000000AAA"
+      }
+    ],
+    "totalSize": 1,
+    "done": true
+  },
+  "warnings": []
+}

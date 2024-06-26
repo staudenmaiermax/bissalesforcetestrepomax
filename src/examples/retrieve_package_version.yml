@@ -1,0 +1,23 @@
+description: >
+  Retrieve the currently installed package version on the target org to use for rollback.
+
+usage:
+  version: 2.1
+  orbs:
+    jsc-sfdx: jsc/salesforce@0.4.0
+  jobs:
+    retrieve_package_version:
+      docker:
+        - image: cimg/openjdk:17.0-node
+      steps:
+        - jsc-sfdx/package-get-installed:
+            targetOrg: << pipeline.parameters.devhubUsername >>
+            devhubUsername: << pipeline.parameters.devhubUsername >>
+        - run:
+            name: Echo installed package version Id
+            command: |
+              echo "Installed package version was: $INSTALLED_PACKAGE_VERSION_ID"
+  workflows:
+    package_deploy:
+      jobs:
+        - retrieve_package_version
