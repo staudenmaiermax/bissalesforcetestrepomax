@@ -1,12 +1,12 @@
 setup() {
     # source script under test
-    source salesforce/helpers/shell/commit-semver-bump.sh
+    source scripts/helpers/shell/commit-semver-bump.sh
 
     # mock environment variables
-    export PARAM_PATH="salesforce/demo-package"
+    export PARAM_PATH="packages/subrepo123"
 
     # mock changes to sfdx-project.json
-    cat salesforce/helpers/data/mock-sfdx-project.json > salesforce/demo-package/sfdx-project.json
+    cat scripts/helpers/data/mock-sfdx-project.json > $PARAM_PATH/sfdx-project.json
 }
 
 teardown() {
