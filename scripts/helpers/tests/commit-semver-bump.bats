@@ -3,7 +3,7 @@ setup() {
     source scripts/helpers/shell/commit-semver-bump.sh
 
     # mock environment variables
-    export PARAM_PATH="packages/subrepo123"
+    export PARAM_PATH="packages/testsubrepo1"
 
     # mock changes to sfdx-project.json
     cat scripts/helpers/data/mock-sfdx-project.json > $PARAM_PATH/sfdx-project.json
