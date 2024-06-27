@@ -16,3 +16,6 @@
 [submodule "packages/testsubrepo3"]
 	path = packages/testsubrepo3
 	url = https://github.com/staudenmaiermax/testsubrepo3
+[submodule "testsubrepo3"]
+	path = testsubrepo3
+	url = https://github.com/staudenmaiermax/testsubrepo3
