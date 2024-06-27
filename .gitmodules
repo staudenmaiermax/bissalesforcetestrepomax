@@ -7,3 +7,12 @@
 [submodule "packages/subrepo1"]
 	path = packages/subrepo1
 	url = https://github.com/staudenmaiermax/subrepo1
+[submodule "packages/testsubrepo1"]
+	path = packages/testsubrepo1
+	url = https://github.com/staudenmaiermax/testsubrepo1
+[submodule "packages/testsubrepo2"]
+	path = packages/testsubrepo2
+	url = https://github.com/staudenmaiermax/testsubrepo2
+[submodule "packages/testsubrepo3"]
+	path = packages/testsubrepo3
+	url = https://github.com/staudenmaiermax/testsubrepo3
