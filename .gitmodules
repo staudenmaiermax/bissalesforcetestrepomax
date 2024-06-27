@@ -4,3 +4,6 @@
 [submodule "packages/Subrepo456"]
 	path = packages/Subrepo456
 	url = https://github.com/staudenmaiermax/Subrepo456
+[submodule "packages/subrepo1"]
+	path = packages/subrepo1
+	url = https://github.com/staudenmaiermax/subrepo1
