@@ -9,7 +9,7 @@
         "default": false,
         "package": "Subrepo123",
         "versionName": "2.0",
-        "versionNumber": "2.0.2.NEXT"
+        "versionNumber": "2.0.3.NEXT"
       },
       {
         "path": "src/unpackaged",
