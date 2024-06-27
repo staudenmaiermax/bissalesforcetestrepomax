@@ -1,6 +1,6 @@
-[submodule "Subrepo123"]
-	path = Subrepo123
+[submodule "packages/Subrepo123"]
+	path = packages/subrepo123
 	url = https://github.com/staudenmaiermax/subrepo123
-[submodule "Subrepo456"]
-	path = Subrepo456
+[submodule "packages/Subrepo456"]
+	path = packages/Subrepo456
 	url = https://github.com/staudenmaiermax/Subrepo456
