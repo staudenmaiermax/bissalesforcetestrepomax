@@ -6,13 +6,13 @@ set -euo pipefail
 main() {
    # Check if there is a changed submodule
    echo "Skript startet"
-   changedSubmodule=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '^packages/' | head -n 1 | cut -d'/' -f1-2)
+   changedSubmodule=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '^packages/' | cut -d'/' -f1-2)
    echo "Erster command durch"
    echo "Changed Submodule: $changedSubmodule"
 
    # Exit script without errors if no submodule changed
    if [ -z "$changedSubmodule" ]; then
-      echo "There is no changed submodule. Exit script without errors."
+      echo "There is no changed submodule. Exit script without errors." ||
       exit 0
    fi 
 
