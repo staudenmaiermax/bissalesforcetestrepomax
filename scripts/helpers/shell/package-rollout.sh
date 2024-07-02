@@ -37,7 +37,7 @@
       echo "Package Version Raw: $package_versionRaw"
 
       # Check if package_versionRaw is set correctly
-      if [ -z "$package_versionRaw" ] || [ "$package_versionRaw" == "null" ]; then
+      if [ -z "$package_versionRaw" ]; then
          echo "Failed to get package version number from sfdx-project.json from $changedSubmodule."
          exit 104
       fi 
@@ -45,7 +45,7 @@
 
    cleanup_versionNumberRaw(){
       # Remove last 5 characters (".NEXT")
-      versionName=$package_versionRaw::-5
+      versionName=${package_versionRaw::-5}
       echo "Version Name: $versionName"
    }
 
