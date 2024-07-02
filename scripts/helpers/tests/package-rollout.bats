@@ -48,23 +48,21 @@ teardown() {
 
 @test "Fail if packageId cannot be extracted" {
     # Arrange
-    export changedSubmodule="testsubrepo1"  # Ensure correct submodule name
-
-    # Remove packageAliases section from sfdx-project.json in the submodule
-    jq 'del(.packageAliases)' "$PARAM_PATH/sfdx-project.json" > "$PARAM_PATH/sfdx-project.json.tmp" && mv "$PARAM_PATH/sfdx-project.json.tmp" "$PARAM_PATH/sfdx-project.json"
+    subscriberVersionId="someValue"  # Initialize the variable with a value
+    changedSubmodule="src/packaged"  # Use an existing submodule path
+    export PARAM_SUBSCRIBER_VERSION_EXPORT="$subscriberVersionId"
+    
+    # Update the sfdx-project.json with wrong package using jq
+    jq '.packageAliases.wrongPackage = "04t000000000001"' "$PARAM_PATH/sfdx-project.json" > "$PARAM_PATH/sfdx-project.json.tmp" && mv "$PARAM_PATH/sfdx-project.json.tmp" "$PARAM_PATH/sfdx-project.json"
 
     # Act
     run main
 
-    # Debugging output
+    # Debug output
     echo "Output: $output"
     echo "Status: $status"
 
     # Assert
     [ "$status" -eq 101 ]
     [[ "$output" == *"Failed to get packageId from sfdx-project.json from $changedSubmodule."* ]]
-    
-    # Debugging: Check if sfdx-project.json exists and its contents
-    ls -l "$PARAM_PATH/$changedSubmodule"
-    cat "$PARAM_PATH/$changedSubmodule/sfdx-project.json"
 }
