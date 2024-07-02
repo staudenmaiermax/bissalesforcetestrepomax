@@ -5,10 +5,16 @@
       "default": true
     },
     {
+      
       "path": "src/packaged",
       "package": "Mock Package For Testing",
       "definitionFile": "config/default-scratch-def.json",
+      "versionName": "1.2.3",
       "versionNumber": "1.2.3.NEXT",
+      "default": false
+    },
+    {
+      "path": "src/unpackaged",
       "default": false
     }
   ],
