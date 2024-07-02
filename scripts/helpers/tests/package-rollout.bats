@@ -1,16 +1,20 @@
 setup() {
-    # source script under test
+# Source script under test
     source scripts/helpers/shell/package-rollout.sh
 
-    # mock environment variables
+    # Mock environment variables
     export PARAM_PATH="packages/testsubrepo1"
-    zwischenspeicher="packages/testsubrepo1"
-    # override with mocked sfdx-project.json
+    
+    # Backup the original sfdx-project.json
+    cp $PARAM_PATH/sfdx-project.json $PARAM_PATH/sfdx-project.json.bak
+    
+    # Override with mocked sfdx-project.json
     cat scripts/helpers/data/mock-sfdx-project.json > $PARAM_PATH/sfdx-project.json
 }
 
 teardown() {
-   cat $zwischenspeicher > $PARAM_PATH/sfdx-project.json
+    # Restore the original sfdx-project.json
+    mv $PARAM_PATH/sfdx-project.json.bak $PARAM_PATH/sfdx-project.json
 
     # Unset environment variables to clean up the environment
     unset PARAM_PATH
