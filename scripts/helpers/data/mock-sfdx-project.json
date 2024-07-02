@@ -20,6 +20,6 @@
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "60.0",
   "packageAliases": {
-    "testsubrepo3": "0Ho99999999"
+    "testsubrepo1": "0Ho99999999"
   }
 }
