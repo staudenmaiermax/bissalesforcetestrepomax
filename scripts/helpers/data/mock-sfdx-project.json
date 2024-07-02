@@ -5,13 +5,11 @@
       "default": true
     },
     {
-      
       "path": "src/packaged",
-      "package": "Mock Package For Testing",
-      "definitionFile": "config/default-scratch-def.json",
-      "versionName": "1.2.3",
-      "versionNumber": "1.2.3.NEXT",
-      "default": false
+      "default": false,
+      "package": "mockpackage",
+      "versionName": "5.0.0",
+      "versionNumber": "5.0.1.NEXT"
     },
     {
       "path": "src/unpackaged",
@@ -19,9 +17,9 @@
     }
   ],
   "namespace": "",
-  "sfdcLoginUrl": "https://wise-narwhal-asvtzx-dev-ed.trailblaze.my.salesforce.com",
-  "sourceApiVersion": "56.0",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "60.0",
   "packageAliases": {
-    "Orb Developer Demo Package": "0Ho09000000CayYCAS"
+    "testsubrepo3": "0Ho99999999"
   }
 }
