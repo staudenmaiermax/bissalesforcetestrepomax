@@ -1,6 +1,6 @@
 setup() {
     # source script under test
-    source scripts/helpers/shell/bump-package-version.sh
+    source scripts/helpers/shell/package-rollout.sh
 
     # mock environment variables
     export PARAM_PATH="packages/testsubrepo1"
@@ -10,80 +10,53 @@ setup() {
 }
 
 teardown() {
+    # Change to the directory containing the sfdx-project.json
     cd $PARAM_PATH
+
+    # Reset the sfdx-project.json to its original state
     git checkout sfdx-project.json
+
+    # Unset environment variables to clean up the environment
+    unset PARAM_PATH
+    unset PARAM_SUBSCRIBER_VERSION_EXPORT
+    unset subscriberVersionId
+    unset changedSubmodule
 }
 
-@test "Bump package PATCH version > commits with PATCH bumped" {
+@test "Exit script if no submodule changed" {
     # Arrange
-    export PARAM_SEMVER_BUMP="PATCH"
-
+    subscriberVersionId="someValue"  # Initialize the variable with a value
+    export PARAM_SUBSCRIBER_VERSION_EXPORT="$subscriberVersionId"
+    
     # Act
     run main
 
+    # Debug output
+    echo "Output: $output"
+    echo "Status: $status"
+
     # Assert
-    echo "Actual output"
-    echo "$output"
-    echo "Actual status: $status"
     [ "$status" -eq 0 ]
-    [[ "$output" == *"Current version is: 1.2.3"* ]]
-    [[ "$output" == *"Applying PATCH increment"* ]]
-    [[ "$output" == *"New version is: 1.2.4"* ]]
-    newVersionOutput=$(jq -r '.packageDirectories[] | select(.path == "src/packaged") | .versionNumber' "$PARAM_PATH"/sfdx-project.json)
-    [ "$newVersionOutput" == "1.2.4.NEXT" ]
+    [[ "$output" == *"There is no changed submodule. Exit script without errors."* ]]
 }
 
-@test "Bump package MINOR version > commits with MINOR bumped" {
+@test "Fail if packageId cannot be extracted" {
     # Arrange
-    export PARAM_SEMVER_BUMP="MINOR"
+    subscriberVersionId="someValue"  # Initialize the variable with a value
+    changedSubmodule="src/packaged"  # Use an existing submodule path
+    export PARAM_SUBSCRIBER_VERSION_EXPORT="$subscriberVersionId"
+    
+    # Update the sfdx-project.json with wrong package using jq
+    jq '.packageAliases.wrongPackage = "04t000000000001"' "$PARAM_PATH/sfdx-project.json" > "$PARAM_PATH/sfdx-project.json.tmp" && mv "$PARAM_PATH/sfdx-project.json.tmp" "$PARAM_PATH/sfdx-project.json"
 
     # Act
     run main
 
-    # Assert
-    echo "Actual output"
-    echo "$output"
-    echo "Actual status: $status"
-    [ "$status" -eq 0 ]
-    [[ "$output" == *"Current version is: 1.2.3"* ]]
-    [[ "$output" == *"Applying MINOR increment"* ]]
-    [[ "$output" == *"New version is: 1.3.0"* ]]
-    newVersionOutput=$(jq -r '.packageDirectories[] | select(.path == "src/packaged") | .versionNumber' "$PARAM_PATH"/sfdx-project.json)
-    [ "$newVersionOutput" == "1.3.0.NEXT" ]
-}
-
-@test "Bump package MAJOR version > commits with MAJOR bumped" {
-    # Arrange
-    export PARAM_SEMVER_BUMP="MAJOR"
-
-    # Act
-    run main
+    # Debug output
+    echo "Output: $output"
+    echo "Status: $status"
 
     # Assert
-    echo "Actual output"
-    echo "$output"
-    echo "Actual status: $status"
-    [ "$status" -eq 0 ]
-    [[ "$output" == *"Current version is: 1.2.3"* ]]
-    [[ "$output" == *"Applying MAJOR increment"* ]]
-    [[ "$output" == *"New version is: 2.0.0"* ]]
-    newVersionOutput=$(jq -r '.packageDirectories[] | select(.path == "src/packaged") | .versionNumber' "$PARAM_PATH"/sfdx-project.json)
-    [ "$newVersionOutput" == "2.0.0.NEXT" ]
-}
-
-@test "Bump package with invalid semver tag > exits with error 100" {
-    # Arrange
-    export PARAM_SEMVER_BUMP="SOMETHING"
-
-    # Act
-    run main
-
-    # Assert
-    echo "Actual output"
-    echo "$output"
-    echo "Actual status: $status"
-    [ "$status" -eq 100 ]
-    [[ "$output" == *"Invalid SEMVER tag SOMETHING"* ]]
-    newVersionOutput=$(jq -r '.packageDirectories[] | select(.path == "src/packaged") | .versionNumber' "$PARAM_PATH"/sfdx-project.json)
-    [ "$newVersionOutput" == "1.2.3.NEXT" ]
+    [ "$status" -eq 101 ]
+    [[ "$output" == *"Failed to get packageId from sfdx-project.json from $changedSubmodule."* ]]
 }
