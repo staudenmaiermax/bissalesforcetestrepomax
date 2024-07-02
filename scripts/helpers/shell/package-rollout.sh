@@ -44,16 +44,10 @@
    }
 
    cleanup_versionNumberRaw(){
-      # Überprüfen, ob die Länge von package_versionRaw mindestens 5 Zeichen beträgt
-    if [ ${#package_versionRaw} -ge 5 ]; then
-        # Entfernen der letzten 5 Zeichen
-        versionName="${package_versionRaw::-5}"
-        echo "Version Name: $versionName"
-    else
-        echo "Error: package_versionRaw ist kürzer als 5 Zeichen."
-        exit 1
-    fi
-}
+      # Remove last 5 characters (".NEXT")
+      versionName=${package_versionRaw::-5}
+      echo "Version Name: $versionName"
+   }
 
       cd "$changedSubmodule"
 
