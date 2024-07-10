@@ -1,107 +1,114 @@
 #!/bin/bash
 
 # Exit on error
-# set -euo pipefail
+set -euo pipefail
 
-   check_changedSubmodule() {
-      # Check if there is a changed submodule
-      echo "Skript startet"
-      changedSubmodule=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '^packages/' | cut -d'/' -f1-2)
-      echo "Erster command durch"
-      echo "Changed Submodule: $changedSubmodule"
-
-      # Exit script without errors if no submodule changed
-      if [ -z "$changedSubmodule" ]; then
-         echo "There is no changed submodule. Exit script without errors." ||
-         exit 0
-      fi 
-   }
-   
-   get_packageId_packageName(){
-      # Get packageId from sfdx-project.json
-      packageName=$(jq -r '.packageDirectories[] | select(.path == "src/packaged") | .package' "$changedSubmodule/sfdx-project.json")
-      echo "Package Name: $packageName"
-      packageId=$(jq -r --arg package "$packageName" '.packageAliases[$package]' "$changedSubmodule/sfdx-project.json")
-      echo "Package ID: $packageId"
-
-      # Check if packageId is set correctly
-      if [ -z "$packageId" ]; then
-         echo "Failed to get packageId from sfdx-project.json from $changedSubmodule."
-         exit 101
-      fi 
-   }
-
-   get_package_versionNumber(){
-      # Get the package version number
-      package_versionRaw=$(jq -r '.packageDirectories[] | select(.path == "src/packaged") | .versionNumber' "$changedSubmodule/sfdx-project.json")
-      echo "Package Version Raw: $package_versionRaw"
-
-      # Check if package_versionRaw is set correctly
-      if [ -z "$package_versionRaw" ]; then
-         echo "Failed to get package version number from sfdx-project.json from $changedSubmodule."
-         exit 104
-      fi 
-   }
-
-   cleanup_versionNumberRaw(){
-      # Überprüfen, ob die Länge von package_versionRaw mindestens 5 Zeichen beträgt
-    if [ ${#package_versionRaw} -ge 5 ]; then
-        # Entfernen der letzten 5 Zeichen
-        versionName="${package_versionRaw::-5}"
-        echo "Version Name: $versionName"
-    else
-        echo "Error: package_versionRaw ist kürzer als 5 Zeichen."
-        exit 1
-    fi
+check_changed_submodule() {
+   echo $(git diff-tree --no-commit-id --name-only -r HEAD | grep '^packages/' | cut -d'/' -f1-2)
 }
 
-      cd "$changedSubmodule"
+verify_submodule_change() {
+   if [ -z "$1" ] || [ "$1" == "null" ]; then
+      echo "No submodule commited. Exiting with 0."
+      exit 0
+   fi
+   echo "Changed submodule detected: $1"
+}
 
-      PARAM_DEVHUB_ORG="admin-salesforce@mobilityhouse.com"
+verify_submodule_is_sfdx_project() {
+   # navigate to submodule
+   # assert that sfdx-project.json exists
+   # exit with error code and helpful message, if it doesn't
+   exit 0
+}
 
-   get_subscriberVersionId(){
-      # Salesforce CLI Command to get latest package version
-      # Extract the SubscriberPackageVersionId and save it in a variable
-      subscriberVersionId=$(sfdx force:package:version:list --released --json | jq -r '.result[-1].SubscriberPackageVersionId')
+get_package_id_from_changed_submodule() {
+   packageName=$(jq -r '.packageDirectories[] | select(.path == "src/packaged") | .package' "$1/sfdx-project.json")
+   echo $(jq -r --arg package "$packageName" '.packageAliases[$package]' "$1/sfdx-project.json")
+}
 
-      # Output the variable for verification
-      echo "Subscriber Package Version ID: $subscriberVersionId"
+verify_package_id_extract() {
+   if [ -z "$1" ] || [ "$1" == "null" ]; then
+      echo "Failed to extract valid package id from commited package."
+      exit 101
+   fi
+   if [[ "$1" != 0Ho* ]]; then
+      echo "Unexpected format for extracted package id: $1. Something wrong with sfdx-project.json?"
+      exit 102
+   fi
+   echo "Package Id: $1"
+}
 
-      # Check if subscriberVersionId is set correctly
-      if [ -z "$subscriberVersionId" ]; then
-         echo "Failed to get subscriberVersionId for package $packageId."
-         exit 102
-      fi 
+extract_package_version_literal() {
+   rawVersionNumberLiteral=$(jq -r '.packageDirectories[] | select(.path == "src/packaged") | .versionNumber' "$1/sfdx-project.json")
+   echo ${rawVersionNumberLiteral:0:${#rawVersionNumberLiteral}-5}
+}
 
-      # Check if subscriberVersionId starts with '04t'
-      if [[ "$subscriberVersionId" != 04t* ]]; then
-         echo "Unexpected format for subscriberVersionId: $subscriberVersionId"
-         exit 103
-      fi
-   }
+verify_package_version_literal() {
+   echo "Identified package version: $1"
+   if [ -z "$1" ] || [ "$1" == "null" ]; then
+      echo "Failed to read package version number from sfdx-project.json."
+      exit 104
+   fi
+}
 
-   addtional_tests(){
-      export PARAM_SUBSCRIBER_VERSION_EXPORT="$subscriberVersionId"
+query_package_subscriber_id() {
+   sf data query --use-tooling-api --json --query "$1" --target-org "$2" | jq -r '.result.records[0].SubscriberPackageVersionId' 2> /dev/null
+}
 
-      # Check if PARAM_DEVHUB_ORG is set correctly
-      if [ -z "$PARAM_DEVHUB_ORG" ]; then
-         echo "There is no DevHub Org parameter"
-         exit 201
-      fi
+build_subscriber_version_query() {
+   IFS='.' read -ra versionArray <<< "$2"
+   # line breaks for readability. Asserts rely on WHERE clause in single line
+   echo "SELECT SubscriberPackageVersionId \ 
+      FROM Package2Version \
+      WHERE \
+         Package2Id = '$1' AND MajorVersion = ${versionArray[0]} AND MinorVersion = ${versionArray[1]} AND PatchVersion = ${versionArray[2]} AND IsReleased = true"
+}
 
-      # Check if PARAM_SUBSCRIBER_VERSION_EXPORT is set correctly
-      if [ -z "$PARAM_SUBSCRIBER_VERSION_EXPORT" ]; then
-         echo "There is no subscriber version export parameter"
-         exit 202
-      fi
-   }
+verify_subscriber_package_id() {
+   if [ -z "$1" ] || [ "$1" == "null" ]; then
+      echo "Failed to get subscriberVersionId. Is there already a released package version?"
+      exit 102
+   fi
+   if [[ "$1" != 04t* ]]; then
+      echo "Unexpected format for subscriberVersionId $1"
+      exit 103
+   fi
+   echo "Subscriber Package Id: $subscriberVersionId"
+}
 
-   main() {
-      check_changedSubmodule
-      get_packageId_packageName
-      get_package_versionNumber
-      cleanup_versionNumberRaw
-      get_subscriberVersionId
-      addtional_tests
-      
-   }
+parameter_verification() {
+   export PARAM_SUBSCRIBER_VERSION_EXPORT="$subscriberVersionId"
+   export PARAM_DEVHUB_ORG="admin-salesforce@mobilityhouse.com"
+
+   # Check if PARAM_DEVHUB_ORG is set correctly
+   if [ -z "$PARAM_DEVHUB_ORG" ] || [ "$PARAM_DEVHUB_ORG" == "null" ]; then
+      echo "There is no DevHub Org parameter"
+      exit 201
+   fi
+
+   # Check if PARAM_SUBSCRIBER_VERSION_EXPORT is set correctly
+   if [ -z "$PARAM_SUBSCRIBER_VERSION_EXPORT" ] || [ "$PARAM_SUBSCRIBER_VERSION_EXPORT" == "null" ]; then
+      echo "There is no subscriber version export parameter"
+      exit 202
+   fi
+}
+
+main() {
+   changedSubmodule=$(check_changed_submodule)
+   verify_submodule_change "$changedSubmodule"
+   packageId=$(get_package_id_from_changed_submodule "$changedSubmodule")
+   verify_package_id_extract "$packageId"
+   versionLiteral=$(extract_package_version_literal $changedSubmodule)
+   verify_package_version_literal $versionLiteral
+   toolingApiQuery=$(build_subscriber_version_query $packageId $versionLiteral)
+   echo "Running query ...: $toolingApiQuery"
+   subscriberVersionId=$(query_package_subscriber_id $toolingApiQuery $PARAM_DEVHUB_ORG)
+   verify_subscriber_package_id $subscriberVersionId
+   # parameter_verification
+}
+
+ORB_TEST_ENV="bats-core"
+if [ "${0#*"$ORB_TEST_ENV"}" == "$0" ]; then
+   main
+fi

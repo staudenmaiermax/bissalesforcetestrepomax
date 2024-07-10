@@ -20,6 +20,6 @@
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "60.0",
   "packageAliases": {
-    "mockpackage": "0Ho000000000000AAA"
+    "mockpackage": "0Ho11111111"
   }
 }
