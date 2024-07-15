@@ -13,13 +13,11 @@ verify_submodule_change() {
       exit 0
    fi
    echo "Changed submodule detected: $1"
-}
-
-verify_submodule_is_sfdx_project() {
-   # navigate to submodule
-   # assert that sfdx-project.json exists
-   # exit with error code and helpful message, if it doesn't
-   exit 0
+   if [ ! -f "$1/sfdx-project.json" ]; then
+      echo "The submodule $1 is not a valid sfdx project. Missing sfdx-project.json."
+      exit 0
+   fi
+   echo "$1 is a valid sfdx project. Proceeding."
 }
 
 get_package_id_from_changed_submodule() {
@@ -94,6 +92,11 @@ parameter_verification() {
    fi
 }
 
+export_subscriber_id_to_env_var() {
+   echo "Exporting release version $1 to $2"
+   echo "export $2=$1" >> "$BASH_ENV"
+}
+
 main() {
    changedSubmodule=$(check_changed_submodule)
    verify_submodule_change "$changedSubmodule"
@@ -105,7 +108,7 @@ main() {
    echo "Running query ...: $toolingApiQuery"
    subscriberVersionId=$(query_package_subscriber_id $toolingApiQuery $PARAM_DEVHUB_ORG)
    verify_subscriber_package_id $subscriberVersionId
-   # parameter_verification
+   export_subscriber_id_to_env_var $subscriberVersionId $PARAM_EXPORT_VARIABLE_NAME
 }
 
 ORB_TEST_ENV="bats-core"

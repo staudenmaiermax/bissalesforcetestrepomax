@@ -11,6 +11,11 @@ setup() {
     
     # Override with mocked sfdx-project.json
     cat scripts/helpers/data/mock-sfdx-project.json > "packages/testsubrepo1/sfdx-project.json"
+
+    # mock the CircleCI BASH_ENV and create an empty file there
+    mkdir -p ~/circleci_bash_env
+    export BASH_ENV=~/circleci_bash_env/mocked_bash_env.txt
+    >"$BASH_ENV"
 }
 
 teardown() {
@@ -20,6 +25,9 @@ teardown() {
     # Unset environment variables to clean up the environment
     unset PARAM_PATH
     unset PARAM_SUBSCRIBER_VERSION_EXPORT
+
+    # reset mocked CircleCI bash env
+    rm -f $BASH_ENV
 }
 
 @test "No submodule changed > Exit 0" {
@@ -48,20 +56,43 @@ teardown() {
 
     # Act
     run main
+    exportedBashEnv=$(< "$BASH_ENV")
+    echo "$output"
+    echo "BASH_ENV: $exportedBashEnv"
 
     # Assert
-    echo "$output"
     [ "$status" -eq 0 ]
     [[ "$output" == *"Changed submodule detected: packages/testsubrepo1"* ]]
     [[ "$output" == *"Package Id: 0Ho000000000000AAA"* ]]
     [[ "$output" == *"Identified package version: 5.0.1"* ]]
     [[ "$output" == *"Package2Id = '0Ho000000000000AAA' AND MajorVersion = 5 AND MinorVersion = 0 AND PatchVersion = 1 AND IsReleased = true"* ]]
     [[ "$output" == *"Subscriber Package Id: 04t000000000001AAA"* ]]
+    [ -f "$BASH_ENV" ]
+    # found mocked subscriber package version id
+    [[ "$output" == *"Exporting release version 04t000000000001AAA to SUBSCRIBER_PACKAGE_VERSION_ID"* ]]
+    [[ $exportedBashEnv == 'export SUBSCRIBER_PACKAGE_VERSION_ID=04t000000000001AAA' ]]
+}
+
+@test "Changed submodule is not a valid sfdx-project > exit with error" {
+    # Arrange
+    rm -f packages/testsubrepo1/sfdx-project.json
+    check_changed_submodule() {
+        echo "packages/testsubrepo1"
+    }
+
+    # Act
+    run main
+
+    # Assert
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Changed submodule detected: packages/testsubrepo1"* ]]
+    [[ "$output" == *"The submodule packages/testsubrepo1 is not a valid sfdx project. Missing sfdx-project.json."* ]]
 }
 
 @test "Fail if packageId cannot be extracted" {
     skip
     # Arrange
+    PARAM_PATH="packages/testsubrepo1"
     jq '.packageAliases["mockpackage"] = ""' "$PARAM_PATH/sfdx-project.json" > "$PARAM_PATH/sfdx-project.json.tmp" && mv "$PARAM_PATH/sfdx-project.json.tmp" "$PARAM_PATH/sfdx-project.json"
 
     # Act
@@ -77,15 +108,16 @@ teardown() {
 @test "Fail if subscriberVersionId cannot be retrieved" {
     skip
     # Arrange
-    export changedSubmodule="packages/testsubrepo2"
+    export changedSubmodule="packages/testsubrepo1"
+    verify_subscriber_package_id=""
     
     query_package_subscriber_id() {
         subscriberVersionId=""
     }
 
-    parameter_verification() {
-        subscriberVersionId=""
-    }
+    #parameter_verification() {
+    #    subscriberVersionId=""
+    # }
     
     # Act
     run main
@@ -101,6 +133,8 @@ teardown() {
 @test "Fail if subscriberVersionId format is incorrect" {
     skip
     # Arrange
+    PARAM_PATH="packages/testsubrepo1"
+    verify_subscriber_package_id="07a0000000001"
     export changedSubmodule="packages/testsubrepo2"
     
     query_package_subscriber_id() {
